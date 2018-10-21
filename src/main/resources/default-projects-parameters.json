@@ -1,0 +1,75 @@
+{
+  "comment" : [
+    "This is the current list of all webcurator split repositories.",
+    "Note that this list is alphabetical order to more easily be matched with the list as shown in github"
+    ],
+  "webcurator-source-project" : {
+    "comment" : [
+      "This is the source webcurator project, for which all the webcurator projects are derived."
+    ],
+    "codeRepositoryServerUrl" : "ssh://git@github.com:DIA-NZ/webcurator.git"
+  },
+  "projects" : {
+    "assembly" : {
+      "subdirectoryFilterPath" : "wct-assembly",
+      "nonexistentFilesAndFolders" : [ ],
+      "removalFilesAndFolders" : [ ]
+    },
+    "core" : {
+      "subdirectoryFilterPath" : "wct-core",
+      "nonexistentFilesAndFolders" : [ ],
+      "removalFilesAndFolders" : [ "db", "docs", "etc" ]
+    },
+    "db" : {
+      "subdirectoryFilterPath" : "wct-core/db",
+      "nonexistentFilesAndFolders" : [ ],
+      "removalFilesAndFolders" : [ ]
+    },
+    "docs" : {
+      "subdirectoryFilterPath" : "docs",
+      "nonexistentFilesAndFolders" : [ ],
+      "removalFilesAndFolders" : [  ]
+    },
+    "harvest-agent-h1" : {
+      "subdirectoryFilterPath" : "harvest-agent-h1",
+      "nonexistentFilesAndFolders" : [ ],
+      "removalFilesAndFolders" : [ ]
+    },
+    "harvest-agent-h3" : {
+      "subdirectoryFilterPath" : "harvest-agent-h3",
+      "nonexistentFilesAndFolders" : [ ],
+      "removalFilesAndFolders" : [ ]
+    },
+    "legacy-docs" : {
+      "subdirectoryFilterPath" : "wct-core/docs",
+      "nonexistentFilesAndFolders" : [ ],
+      "removalFilesAndFolders" : [  ]
+    },
+    "legacy-misc" : {
+      "subdirectoryFilterPath" : "wct-core/etc",
+      "nonexistentFilesAndFolders" : [ ],
+      "removalFilesAndFolders" : [ "lib", "photoshop" ]
+    },
+    "legacy-photoshop" : {
+      "subdirectoryFilterPath" : "wct-core/etc/photoshop",
+      "nonexistentFilesAndFolders" : [ ],
+      "removalFilesAndFolders" : [ ]
+    },
+    "lib-dependencies" : {
+      "subdirectoryFilterPath" : "wct-core/etc/lib",
+      "nonexistentFilesAndFolders" : [ ],
+      "removalFilesAndFolders" : [ ]
+    },
+
+    "store" : {
+      "subdirectoryFilterPath" : "wct-store",
+      "nonexistentFilesAndFolders" : [ ],
+      "removalFilesAndFolders" : [ ]
+    },
+    "submit-to-rosetta" : {
+      "subdirectoryFilterPath" : "wct-submit-to-rosetta",
+      "nonexistentFilesAndFolders" : [ ],
+      "removalFilesAndFolders" : [ ]
+    }
+  }
+}
