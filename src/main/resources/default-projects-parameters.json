@@ -12,13 +12,13 @@
   "projects" : {
     "assembly" : {
       "subdirectoryFilterPath" : "wct-assembly",
-      "nonexistentFilesAndFolders" : [ ],
+      "nonexistentFilesAndFolders" : [ ".project", ".classpath", ".settings" ],
       "removalFilesAndFolders" : [ ]
     },
     "core" : {
       "subdirectoryFilterPath" : "wct-core",
-      "nonexistentFilesAndFolders" : [ ],
-      "removalFilesAndFolders" : [ "db", "docs", "etc" ]
+      "nonexistentFilesAndFolders" : [ ".project", ".classpath", ".settings", "logs" ],
+      "removalFilesAndFolders" : [ "build", "db", "docs", "etc", "src/main/webapp", "src/main/webapp-filter" ]
     },
     "db" : {
       "subdirectoryFilterPath" : "wct-core/db",
@@ -33,43 +33,61 @@
     "harvest-agent-h1" : {
       "subdirectoryFilterPath" : "harvest-agent-h1",
       "nonexistentFilesAndFolders" : [ ],
-      "removalFilesAndFolders" : [ ]
+      "removalFilesAndFolders" : [ "build/legacy" ]
     },
     "harvest-agent-h3" : {
       "subdirectoryFilterPath" : "harvest-agent-h3",
       "nonexistentFilesAndFolders" : [ ],
-      "removalFilesAndFolders" : [ ]
+      "removalFilesAndFolders" : [ "build/legacy", "etc" ]
     },
     "legacy-docs" : {
       "subdirectoryFilterPath" : "wct-core/docs",
       "nonexistentFilesAndFolders" : [ ],
-      "removalFilesAndFolders" : [  ]
+      "removalFilesAndFolders" : [ ".cvsignore" ]
     },
-    "legacy-misc" : {
-      "subdirectoryFilterPath" : "wct-core/etc",
-      "nonexistentFilesAndFolders" : [ ],
-      "removalFilesAndFolders" : [ "lib", "photoshop" ]
+    "legacy-lib-dependencies" : {
+      "subdirectoryFilterPath" : "",
+      "nonexistentFilesAndFolders" : [ ".project", ".settings", "*/.project", "*/.classpath", "wct-core/.settings", "wct-core/logs",
+                                       "wct-store/logs", "wct-store/.settings", "wct-submit-to-rosetta/DpsDepositError.log",
+                                       "wct-submit-to-rosetta/.settings"
+                                     ],
+      "removalFilesAndFolders" : [ "docs", "harvest-agent-h1", "harvest-agent-h3/build", "harvest-agent-h3/docs",
+                                   "harvest-agent-h3/src", "harvest-agent-h3/pom.xml", "harvest-agent-h3/readme.md",
+                                   "wct-assembly", "wct-core/build", "wct-core/db", "wct-core/docs",
+                                   "wct-core/etc/photoshop", "wct-core/src", "wct-core/pom.xml",
+                                   "wct-harvest-agent", "wct-store/build", "wct-store/docs", "wct-store/src",
+                                   "wct-store/maven_dependencies.txt", "wct-store/pom.xml", "wct-submit-to-rosetta/build",
+                                   "wct-submit-to-rosetta/docs", "wct-submit-to-rosetta/src", "wct-submit-to-rosetta/pom.xml",
+                                   "wct-submit-to-rosetta/Readme.txt", "development.txt", "pom.xml", "readme.md",
+                                   "upgrade_config.txt", ".travis.yml"
+                                 ],
+      "comment" : [
+        "We want: harvest-agent-h3/etc/lib, wct-core/etc/lib, wct-core/etc/misc, wct-core/*.jar, wct-store/etc/lib,",
+        "  wct-submit-to-rosetta/endorsed-lib, wct-submit-to-rosetta/lib, install_maven_dependencies.[bat|sh]"]
     },
     "legacy-photoshop" : {
       "subdirectoryFilterPath" : "wct-core/etc/photoshop",
       "nonexistentFilesAndFolders" : [ ],
       "removalFilesAndFolders" : [ ]
     },
-    "lib-dependencies" : {
-      "subdirectoryFilterPath" : "wct-core/etc/lib",
-      "nonexistentFilesAndFolders" : [ ],
-      "removalFilesAndFolders" : [ ]
-    },
 
     "store" : {
       "subdirectoryFilterPath" : "wct-store",
-      "nonexistentFilesAndFolders" : [ ],
-      "removalFilesAndFolders" : [ ]
+      "nonexistentFilesAndFolders" : [ ".project", ".classpath", ".settings", "logs" ],
+      "removalFilesAndFolders" : [ "build/legacy", "etc" ],
+      "comment" : [
+        "etc only contains the folder lib, but we remove both"
+      ]
     },
     "submit-to-rosetta" : {
       "subdirectoryFilterPath" : "wct-submit-to-rosetta",
-      "nonexistentFilesAndFolders" : [ ],
-      "removalFilesAndFolders" : [ ]
+      "nonexistentFilesAndFolders" : [ ".project", ".classpath", ".settings", "DpsDepositError.log" ],
+      "removalFilesAndFolders" : [ "build/legacy", "endorsed-lib", "lib" ]
+    },
+    "webapp" : {
+      "subdirectoryFilterPath" : "wct-core",
+      "nonexistentFilesAndFolders" : [ ".project", ".classpath", ".settings", "logs" ],
+      "removalFilesAndFolders" : [ "lib", "build/legacy", "db", "docs", "etc", "src/main/java", "src/test" ]
     }
   }
 }
