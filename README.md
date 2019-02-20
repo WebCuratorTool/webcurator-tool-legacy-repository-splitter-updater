@@ -25,7 +25,117 @@ The default split-target repository parameters are found in `src/main/resources/
 ## Example operations
 
 These example operations should be executed from the root folder of the `nlnz-m11n-tools-repository-splitter-updater`
-project. They use the tasks defined by that project to perform the repository splits operations.
+project (currently found at https://github.com/NLNZDigitalPreservation/nlnz-m11n-tools-repository-splitter-updater).
+They use the tasks defined by that project to perform the repository splits operations.
+
+## Recommended process
+
+### First time
+
+1. `cloneSourceRepository`.
+2. See *Create initial base branch in source repository*.
+3. `createSplitTargetRepositories` (first time, since these repositories haven't been created yet).
+4. `extractAndPatchProjects`.
+5. See *Push newly created repositories to github or other code management system*.
+6. See *Create merge branch and merge into master branch*.
+
+### Subsequent updates
+
+1. `cloneSourceRepository`.
+2. See *Create appropriate branch in the source repository*.
+3. See *Create appropriate branch in the split-target source repository*.
+4. `cloneSplitTargetRepositories`.
+5. `extractAndPatchProjects`.
+6. See *Push changes to github or other code management system*.
+7. See *Create merge branch and merge into master branch*.
+
+### Create initial base branch in source repository
+
+To make this process workable in the long-term, it's best to have a fixed base branch in the source branch to work from.
+This branch would be based on the `master` branch at a certain point in time. The GUI provided by github or bitbucket
+may not be able to specify the source branch, but since it defaults to `master` that may not be an issue. Otherwise,
+we can perform the operation on the command line. The source repository must be cloned first and then perform the
+following operation:
+```
+git checkout -b "<initial-patch-base-branch-name>" origin/master
+git push origin HEAD
+```
+
+### Create appropriate branch in the source repository
+
+For subsequent patching operations, there needs to be a *to* branch for patching operations to occur. The patches are
+created based on the differences between the *from* branch (which is the initial base branch) and the *to* branch. This
+*to* branch is created the same way as the initial base branch, but this time it is based on the initial base branch
+and *not* master. As before, the source repository must be cloned first. We then perform the following operation:
+```
+git checkout -b "<patch-point-branch-name>" origin/<initial-patch-base-branch-name>
+git push origin HEAD
+```
+
+### Create appropriate branch in the split-target source repository
+
+If the split-target source repository already exists, it would have a branch where the initial patches have been applied.
+For subsequent patching operations, we want to create a branch based on that *last* patched branch where we apply the
+new sets of patches. The GUI provided by github or bitbucket may not be able to specify the source branch, so it may be
+necessary to perform the operation on the command line. The split-target repositories must be cloned first and then in
+each of those cloned split-target repositories, perform the following operation:
+```
+git checkout -b "<your-branch-name>" origin/<base-branch>
+git push origin HEAD
+```
+
+### Push changes to github or other code management system
+
+Even if there are no changes to the patched branch, we still want this branch to exist in the target repository, as it
+becomes the starting point for the next set of patch updates.
+
+If the repository origin has been setup correctly, simply issue the command:
+```
+git push orgin HEAD
+```
+
+### Create merge branch and merge into master branch
+
+After the branch that contains the patches from the source repository has been created and patched, this branch will
+need to be merged into the master (or development) branch. We'll call this branch the *working branch*. The working
+branch is where the files that came from the source repository are moved and manipulated. For example, you may need to
+change the directory structure or alter files to fit the new project's direction and development plan.
+
+Every time an updated branch is merged into this working branch, git will perform the same manipulations on the files
+that are being merged in. For example, a file is moved to a new development structure and updated to reflect an
+underlying development need. Subsequent merges of patched branches from the source repository into the working branch
+will have those changes applied to that file in its new location.
+
+The only changes that will not occur are new files. New files from the source repository will need to be moved to
+their new locations just like the other files that were moved there (most likely by using `git mv`).
+
+We want to keep the *initial-patch-base-branch* or *patch-point-branch* in the target repository, as these are the
+difference points for subsequent updates. We first checkout the working branch, do a fetch and pull to ensure that it
+is up to date. We then create a merge branch based on the *working branch*:
+```
+git checkout <working-branch>
+git fetch
+git pull
+git checkout --no-track -b "patch-branch-<name>-merge-into-working-branch" origin/<working-branch>
+git push origin HEAD
+```
+
+We then merge the patch branch into the merge branch that we have just created. The option `--no-edit` is to
+automatically keep the generated commit message:
+```
+git merge origin/<patch-branch-name> --no-edit
+```
+
+There may be merge conflicts. Resolve those conflicts. Move any necessary files to the correct location. Once the
+conflicts have been resolved and committed, push up the merge branch and create a pull request to merge it into the
+*working branch*. The merge of the pull request should include the deletion of the merge branch.
+```
+git push origin HEAD
+```
+
+When using github to merge the pull request you may consider using either *Merge pull request* or *Rebase and merge* as
+described by https://help.github.com/articles/about-pull-request-merges/. It depends on what kind of commit history
+you want on the *working branch*.
 
 ### Setting common variables
 
@@ -62,6 +172,14 @@ tempWorkFolder="/my/temp-folder"
 reportsFolder="/my/reports-folder"
 autocreateReportsFolder="true"
 
+# For cloneSplitTargetRepositories, when those repositories already exist
+# splitTargetRepositoryServerUrlBase=[split-target-repository-server-url-base]
+cloneSplitTargetRepositoriesRemoveRemoteOrigin="false"
+# Cloning using HTTPS:
+#splitTargetRepositoryServerUrlBase="https://github.com/WebCuratorTool/"
+# Cloning using SSH: (if .ssh setup correctly, can easily push to origin)
+splitTargetRepositoryServerUrlBase="git@github.com:WebCuratorTool/"
+
 # For applyPatchesOnly and (applyPatchesOnly in combination with cloneRepositories)
 repositoryWorkflowStartingSequenceIndex="3"
 patchesFolderPath="/path/to/my/special/edited/patches/folder"
@@ -85,29 +203,12 @@ gradle cloneSourceRepository \
  --stacktrace --info
 ```
 
-### cloneSplitTargetRepositories
-
-Clones the split-target repositories into the given folder. The repository names are determined by the project names
-found in the `projectParametersJsonFile` file in combination with the includeProjectNames and excludeProjectNames. Note
-that the final branch name in preserveBranchNames is the one that is checked out after the repository is cloned.
-
-Example:
-```
-gradle cloneSplitTargetRepositories \
-  -PprojectParametersJsonFile="${projectParametersJsonFile}" \
-  -PsplitTargetProjectsRootFolder="${splitTargetProjectsRootFolder}" \
-  -PautocreateSplitTargetProjectsRootFolder="${autocreateSplitTargetProjectsRootFolder}" \
-  -PpreserveBranchNames="${preserveBranchNames}" \
-  -PincludeProjectNames="${includeProjectNames}" \
-  -PexcludeProjectNames="${excludeProjectNames}" \
-  -PcloneSplitTargetRepositoriesRemoveRemoteOrigin=${cloneSplitTargetRepositoriesRemoveRemoteOrigin} \
-  --stacktrace --info
-```
-
-#### createSplitTargetRepositories
+#### createSplitTargetRepositories (when the split-target repositories don't yet exist)
 
 Creates the split-target repositories from the source repository based on the given parameteres.
 This does all RepositoryWorkflow operations and produces a series of repositories.
+
+*NOTE* that if these repositories already exist then it's better to use `cloneSplitTargetRepositories`.
 
 Example:
 ```
@@ -131,6 +232,29 @@ gradle createSplitTargetRepositories \
   -PtempWorkFolder="${tempWorkFolder}" \
   -PreportsFolder="${reportsFolder}" \
   -PautocreateReportsFolder="${autocreateReportsFolder}" \
+  --stacktrace --info
+```
+
+### cloneSplitTargetRepositories (when the split-target repositories already exist)
+
+Clones the split-target repositories into the given folder. The repository names are determined by the project names
+found in the `projectParametersJsonFile` file in combination with the includeProjectNames and excludeProjectNames. Note
+that the final branch name in preserveBranchNames is the one that is checked out after the repository is cloned.
+
+*NOTE* that this only works if those repositories already exist. If the split-target repositories don't exist yet,
+use `createSplitTargetRepositories`.
+
+Example:
+```
+gradle cloneSplitTargetRepositories \
+  -PprojectParametersJsonFile="${projectParametersJsonFile}" \
+  -PsplitTargetProjectsRootFolder="${splitTargetProjectsRootFolder}" \
+  -PautocreateSplitTargetProjectsRootFolder="${autocreateSplitTargetProjectsRootFolder}" \
+  -PpreserveBranchNames="${preserveBranchNames}" \
+  -PincludeProjectNames="${includeProjectNames}" \
+  -PexcludeProjectNames="${excludeProjectNames}" \
+  -PcloneSplitTargetRepositoriesRemoveRemoteOrigin=${cloneSplitTargetRepositoriesRemoveRemoteOrigin} \
+  -PsplitTargetRepositoryServerUrlBase=${splitTargetRepositoryServerUrlBase} \
   --stacktrace --info
 ```
 
@@ -267,4 +391,4 @@ See git commits to see who contributors are. Issues are tracked through the gith
 
 ## License
 
-&copy; 2018 National Library of New Zealand. MIT License. All rights reserved.
+&copy; 2018 -- 2019 National Library of New Zealand. MIT License. All rights reserved.

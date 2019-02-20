@@ -10,42 +10,42 @@
     "codeRepositoryServerUrl" : "ssh://git@github.com:DIA-NZ/webcurator.git"
   },
   "projects" : {
-    "assembly" : {
+    "webcurator-assembly" : {
       "subdirectoryFilterPath" : "wct-assembly",
       "nonexistentFilesAndFolders" : [ ".project", ".classpath", ".settings" ],
       "removalFilesAndFolders" : [ ]
     },
-    "core" : {
+    "webcurator-core" : {
       "subdirectoryFilterPath" : "wct-core",
       "nonexistentFilesAndFolders" : [ ".project", ".classpath", ".settings", "logs" ],
-      "removalFilesAndFolders" : [ "build", "db", "docs", "etc", "src/main/webapp", "src/main/webapp-filter" ]
+      "removalFilesAndFolders" : [ "build/jetty", "build/legacy", "db", "docs", "etc", "src/main/webapp", "src/main/webapp-filter" ]
     },
-    "db" : {
+    "webcurator-db" : {
       "subdirectoryFilterPath" : "wct-core/db",
       "nonexistentFilesAndFolders" : [ ],
       "removalFilesAndFolders" : [ ]
     },
-    "docs" : {
+    "webcurator-docs" : {
       "subdirectoryFilterPath" : "docs",
       "nonexistentFilesAndFolders" : [ ],
       "removalFilesAndFolders" : [  ]
     },
-    "harvest-agent-h1" : {
+    "webcurator-harvest-agent-h1" : {
       "subdirectoryFilterPath" : "harvest-agent-h1",
       "nonexistentFilesAndFolders" : [ ],
       "removalFilesAndFolders" : [ "build/legacy" ]
     },
-    "harvest-agent-h3" : {
+    "webcurator-harvest-agent-h3" : {
       "subdirectoryFilterPath" : "harvest-agent-h3",
       "nonexistentFilesAndFolders" : [ ],
       "removalFilesAndFolders" : [ "build/legacy", "etc" ]
     },
-    "legacy-docs" : {
+    "webcurator-legacy-docs" : {
       "subdirectoryFilterPath" : "wct-core/docs",
       "nonexistentFilesAndFolders" : [ ],
       "removalFilesAndFolders" : [ ".cvsignore" ]
     },
-    "legacy-lib-dependencies" : {
+    "webcurator-legacy-lib-dependencies" : {
       "subdirectoryFilterPath" : "",
       "nonexistentFilesAndFolders" : [ ".project", ".settings", "*/.project", "*/.classpath", "wct-core/.settings", "wct-core/logs",
                                        "wct-store/logs", "wct-store/.settings", "wct-submit-to-rosetta/DpsDepositError.log",
@@ -65,13 +65,13 @@
         "We want: harvest-agent-h3/etc/lib, wct-core/etc/lib, wct-core/etc/misc, wct-core/*.jar, wct-store/etc/lib,",
         "  wct-submit-to-rosetta/endorsed-lib, wct-submit-to-rosetta/lib, install_maven_dependencies.[bat|sh]"]
     },
-    "legacy-photoshop" : {
+    "webcurator-legacy-photoshop" : {
       "subdirectoryFilterPath" : "wct-core/etc/photoshop",
       "nonexistentFilesAndFolders" : [ ],
       "removalFilesAndFolders" : [ ]
     },
 
-    "store" : {
+    "webcurator-store" : {
       "subdirectoryFilterPath" : "wct-store",
       "nonexistentFilesAndFolders" : [ ".project", ".classpath", ".settings", "logs" ],
       "removalFilesAndFolders" : [ "build/legacy", "etc" ],
@@ -79,12 +79,12 @@
         "etc only contains the folder lib, but we remove both"
       ]
     },
-    "submit-to-rosetta" : {
+    "webcurator-submit-to-rosetta" : {
       "subdirectoryFilterPath" : "wct-submit-to-rosetta",
       "nonexistentFilesAndFolders" : [ ".project", ".classpath", ".settings", "DpsDepositError.log" ],
       "removalFilesAndFolders" : [ "build/legacy", "endorsed-lib", "lib" ]
     },
-    "webapp" : {
+    "webcurator-webapp" : {
       "subdirectoryFilterPath" : "wct-core",
       "nonexistentFilesAndFolders" : [ ".project", ".classpath", ".settings", "logs" ],
       "removalFilesAndFolders" : [ "lib", "build/legacy", "db", "docs", "etc", "src/main/java", "src/test" ]
