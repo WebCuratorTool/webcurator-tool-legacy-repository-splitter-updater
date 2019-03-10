@@ -37,17 +37,17 @@ They use the tasks defined by that project to perform the repository splits oper
 3. `createSplitTargetRepositories` (first time, since these repositories haven't been created yet).
 4. `extractAndPatchProjects`.
 5. See *Push newly created repositories to github or other code management system*.
-6. See *Create merge branch and merge into master branch*.
+6. See *Create patch-merge branch and merge into master branch*.
 
 ### Subsequent updates
 
 1. `cloneSourceRepository`.
-2. See *Create appropriate branch in the source repository*.
-3. See *Create appropriate branch in the split-target source repository*.
-4. `cloneSplitTargetRepositories`.
+2. See *Create appropriate to branch in the source repository*.
+3. `cloneSplitTargetRepositories`.
+4. See *Create appropriate branch in the split-target source repository*.
 5. `extractAndPatchProjects`.
 6. See *Push changes to github or other code management system*.
-7. See *Create merge branch and merge into master branch*.
+7. See *Create patch-merge branch and merge into master branch*.
 
 ### Create initial base branch in source repository
 
@@ -57,30 +57,46 @@ may not be able to specify the source branch, but since it defaults to `master` 
 we can perform the operation on the command line. The source repository must be cloned first and then perform the
 following operation:
 ```
-git checkout -b "<initial-patch-base-branch-name>" origin/master
+git checkout -b "<source-initial-patch-base-branch-name>" origin/master
 git push origin HEAD
 ```
 
-### Create appropriate branch in the source repository
+For purposes of documentation, we will refer to this initial patch branch as the *source-initial-patch-base*.
+
+### Create appropriate to branch in the source repository
 
 For subsequent patching operations, there needs to be a *to* branch for patching operations to occur. The patches are
-created based on the differences between the *from* branch (which is the initial base branch) and the *to* branch. This
-*to* branch is created the same way as the initial base branch, but this time it is based on the initial base branch
-and *not* master. As before, the source repository must be cloned first. We then perform the following operation:
+created based on the differences between the *from* branch (which is the *source-initial-patch-base* branch) and the
+*to* branch. For purposes of documentation we will refer to this subsequent patch branch as the *source-patch-point*
+branch. This *to* or *source-patch-point* branch is created the same way as the *source-initial-patch-base* branch,
+but this time it is based on the *master* branch at the commit point that we want to capture. Note that we could also
+use a specific commit or tag as the commit point.
+
+As before, the source repository must be cloned first. We then perform the following operation:
 ```
-git checkout -b "<patch-point-branch-name>" origin/<initial-patch-base-branch-name>
+git checkout -b "<source-patch-point-branch-name>" origin/master
 git push origin HEAD
 ```
 
 ### Create appropriate branch in the split-target source repository
 
-If the split-target source repository already exists, it would have a branch where the initial patches have been applied.
-For subsequent patching operations, we want to create a branch based on that *last* patched branch where we apply the
-new sets of patches. The GUI provided by github or bitbucket may not be able to specify the source branch, so it may be
-necessary to perform the operation on the command line. The split-target repositories must be cloned first and then in
-each of those cloned split-target repositories, perform the following operation:
+Case 1:
+If the split-target repository is newly created, we create a *split-target-patch-point* branch based off the *master*
+branch:
 ```
-git checkout -b "<your-branch-name>" origin/<base-branch>
+git checkout -b "<split-target-patch-point-branch-name>" origin/master
+git push origin HEAD
+```
+
+Case 2:
+If the split-target source repository already exists, it would have a *split-target-patch-point* branch where the
+initial patches have been applied. For subsequent patching operations, we want to create a branch based on that *last*
+(or most recent) *split-target-patch-point* branch where we apply the new sets of patches. The GUI provided by github or
+bitbucket may not be able to specify the source branch, so it may be necessary to perform the operation on the command
+line. The split-target repositories must be cloned first and then in each of those cloned split-target repositories,
+perform the following operation:
+```
+git checkout -b "<new-split-target-patch-point>" origin/<most-recent-split-target-patch-point>
 git push origin HEAD
 ```
 
@@ -94,48 +110,63 @@ If the repository origin has been setup correctly, simply issue the command:
 git push orgin HEAD
 ```
 
-### Create merge branch and merge into master branch
+### Create patch-merge branch and merge into master branch
 
-After the branch that contains the patches from the source repository has been created and patched, this branch will
-need to be merged into the master (or development) branch. We'll call this branch the *working branch*. The working
-branch is where the files that came from the source repository are moved and manipulated. For example, you may need to
-change the directory structure or alter files to fit the new project's direction and development plan.
+After the branch that contains the patches from the source repository (the new *split-target-patch-point* branch) has
+been created and patched, this branch will need to be merged into the *master* (or development) branch. Even though the
+branch may not be the master branch, for ease of documentation we'll refer to it as the *master* branch. We'll call the
+branch that gets merged into the master branch the *patch-merge-branch*. It is *not* the *split-target-patch-point*
+branch. The *patch-merge* branch is where the files that came from the source repository are moved and manipulated to
+match the structure of the *master* branch. For example, you may need to change the directory structure or alter files
+to fit the new project's direction and development plan. Eventually the *patch-merge branch* gets merged into the
+*master* branch and the *patch-merge branch* gets deleted.
 
-Every time an updated branch is merged into this working branch, git will perform the same manipulations on the files
-that are being merged in. For example, a file is moved to a new development structure and updated to reflect an
-underlying development need. Subsequent merges of patched branches from the source repository into the working branch
-will have those changes applied to that file in its new location.
+Because the *patch-merge* branch is based on the *master* branch, when the most recent *split-target-patch-point* branch
+is merged into it, git will perform the same manipulations on the files that are being merged in. For example, a file is
+moved to a new development structure and updated to reflect an underlying development need. That file movement is done
+in commits in the *master* branch. Subsequent merges of a new *patch-merge* branch into the *master* branch will have
+those changes applied to that file in its new location.
 
 The only changes that will not occur are new files. New files from the source repository will need to be moved to
-their new locations just like the other files that were moved there (most likely by using `git mv`).
+their new locations just like the other files that were moved there (most likely by using `git mv`). This means that
+the *patch-merge* branch needs to be checked to make sure its structure is correct before it gets merged into the
+*master* branch.
 
-We want to keep the *initial-patch-base-branch* or *patch-point-branch* in the target repository, as these are the
-difference points for subsequent updates. We first checkout the working branch, do a fetch and pull to ensure that it
-is up to date. We then create a merge branch based on the *working branch*:
+We want to keep the *split-target-patch-point* branch in the split-target repository, as these are the difference points
+for subsequent updates. In other words, don't delete te *split-target-patch-point* branch! We first checkout the
+*master* branch, do a fetch and pull to ensure that it is up to date. We then create a merge branch based on the
+*master* branch*:
 ```
-git checkout <working-branch>
+git checkout master
 git fetch
 git pull
-git checkout --no-track -b "patch-branch-<name>-merge-into-working-branch" origin/<working-branch>
+git checkout --no-track -b "patch-branch-<name>-merge-into-master-branch" origin/master
 git push origin HEAD
 ```
 
 We then merge the patch branch into the merge branch that we have just created. The option `--no-edit` is to
 automatically keep the generated commit message:
 ```
-git merge origin/<patch-branch-name> --no-edit
+git merge origin/<most-recent-split-target-patch-point-branch-name> --no-edit
 ```
 
 There may be merge conflicts. Resolve those conflicts. Move any necessary files to the correct location. Once the
-conflicts have been resolved and committed, push up the merge branch and create a pull request to merge it into the
-*working branch*. The merge of the pull request should include the deletion of the merge branch.
+conflicts have been resolved and committed, push up the merge branch:
 ```
 git push origin HEAD
 ```
 
+Then create a pull request to merge it into the *master* branch. The merge of the pull request should include the
+deletion of the merge branch.
+
 When using github to merge the pull request you may consider using either *Merge pull request* or *Rebase and merge* as
 described by https://help.github.com/articles/about-pull-request-merges/. It depends on what kind of commit history
-you want on the *working branch*.
+you want on the *master* branch.
+
+If there are no changes between the *patch-merge* branch and the *master* branch (which means that there are no changes
+between the most recent *split-target-patch-point* branch and the next most recent *split-target-patch-point* branch,
+then there's no need to create a pull request (in fact, it can't be done because there is nothing to merge) and the
+*patch-merge* branch can simply be deleted (as it is identical to the *master* branch). 
 
 ### Setting common variables
 
@@ -161,6 +192,7 @@ splitTargetProjectsRootFolder="/my/split-repositories-work"
 autocreateSplitTargetProjectsRootFolder="true"
 includeProjectNames=
 excludeProjectNames=
+showCommandOutput="true"
 
 # For createSplitTargetRepositories, extractAndPatchProjects, createAndApplyPatchesOnly and applyPatchesOnly
 patchTargetRepositoryFolder="/my/repository-split-work/patch-repositories"
@@ -194,13 +226,14 @@ Clones the source repository into sourceRepositoryWorkingFolder. The repository 
 Example:
 ```
 gradle cloneSourceRepository \
- -PsourceRepositoryWorkingFolder="${sourceRepositoryWorkingFolder}" \
- -PsourceRepositoryNameBase="${sourceRepositoryNameBase}" \
- -PautocreateSourceRepositoryWorkingFolder=true \
- -PsourceRepositoryGitBranch="${sourceRepositoryGitBranch}" \
- -PpreserveBranchNames="${preserveBranchNames}" \
- -PsourceCodeRepositoryServerUrl="${sourceCodeRepositoryServerUrl}" \
- --stacktrace --info
+  -PsourceRepositoryWorkingFolder="${sourceRepositoryWorkingFolder}" \
+  -PsourceRepositoryNameBase="${sourceRepositoryNameBase}" \
+  -PautocreateSourceRepositoryWorkingFolder=true \
+  -PsourceRepositoryGitBranch="${sourceRepositoryGitBranch}" \
+  -PpreserveBranchNames="${preserveBranchNames}" \
+  -PsourceCodeRepositoryServerUrl="${sourceCodeRepositoryServerUrl}" \
+  -PshowCommandOutput="${showCommandOutput}" \
+  --stacktrace --info
 ```
 
 #### createSplitTargetRepositories (when the split-target repositories don't yet exist)
@@ -232,6 +265,7 @@ gradle createSplitTargetRepositories \
   -PtempWorkFolder="${tempWorkFolder}" \
   -PreportsFolder="${reportsFolder}" \
   -PautocreateReportsFolder="${autocreateReportsFolder}" \
+  -PshowCommandOutput="${showCommandOutput}" \
   --stacktrace --info
 ```
 
@@ -255,6 +289,7 @@ gradle cloneSplitTargetRepositories \
   -PexcludeProjectNames="${excludeProjectNames}" \
   -PcloneSplitTargetRepositoriesRemoveRemoteOrigin=${cloneSplitTargetRepositoriesRemoveRemoteOrigin} \
   -PsplitTargetRepositoryServerUrlBase=${splitTargetRepositoryServerUrlBase} \
+  -PshowCommandOutput="${showCommandOutput}" \
   --stacktrace --info
 ```
 
@@ -284,6 +319,7 @@ gradle extractAndPatchProjects \
   -PtempWorkFolder="${tempWorkFolder}" \
   -PreportsFolder="${reportsFolder}" \
   -PautocreateReportsFolder="${autocreateReportsFolder}" \
+  -PshowCommandOutput="${showCommandOutput}" \
   --stacktrace --info
 ```
 
@@ -312,6 +348,7 @@ gradle createAndApplyPatchesOnly \
   -PtempWorkFolder="${tempWorkFolder}" \
   -PreportsFolder="${reportsFolder}" \
   -PautocreateReportsFolder="${autocreateReportsFolder}" \
+  -PshowCommandOutput="${showCommandOutput}" \
   --stacktrace --info
 ```
 
@@ -344,6 +381,7 @@ gradle applyPatchesOnly \
   -PtempWorkFolder="${tempWorkFolder}" \
   -PreportsFolder="${reportsFolder}" \
   -PautocreateReportsFolder="${autocreateReportsFolder}" \
+  -PshowCommandOutput="${showCommandOutput}" \
   --stacktrace --info
 ```
 
@@ -378,6 +416,7 @@ gradle cloneRepositories applyPatchesOnly \
   -PtempWorkFolder="${tempWorkFolder}" \
   -PreportsFolder="${reportsFolder}" \
   -PautocreateReportsFolder="${autocreateReportsFolder}" \
+  -PshowCommandOutput="${showCommandOutput}" \
   --stacktrace --info
 ```
 
